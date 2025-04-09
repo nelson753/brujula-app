@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 const frases = [
@@ -20,6 +20,15 @@ const preguntas = [
 function App() {
   const [frase, setFrase] = useState(frases[0]);
   const [pregunta, setPregunta] = useState(preguntas[0]);
+  const [reflexion, setReflexion] = useState('');
+  const [guardada, setGuardada] = useState('');
+
+  useEffect(() => {
+    const reflexionGuardada = localStorage.getItem('reflexion');
+    if (reflexionGuardada) {
+      setGuardada(reflexionGuardada);
+    }
+  }, []);
 
   const nuevaReflexion = () => {
     const nuevaFrase = frases[Math.floor(Math.random() * frases.length)];
@@ -28,15 +37,48 @@ function App() {
     setPregunta(nuevaPregunta);
   };
 
+  const guardarReflexion = () => {
+    localStorage.setItem('reflexion', reflexion);
+    setGuardada(reflexion);
+    setReflexion('');
+  };
+
   return (
     <div className="App">
       <header className="App-header">
         <h1>✨ Brújula App ✨</h1>
-        <p style={{ fontSize: '1.2rem' }}>{frase}</p>
-        <p style={{ fontStyle: 'italic', marginTop: '20px' }}>{pregunta}</p>
-        <button onClick={nuevaReflexion} style={{ marginTop: '30px', padding: '10px 20px', fontSize: '1rem', borderRadius: '8px', cursor: 'pointer' }}>
+        <p>{frase}</p>
+        <p style={{ fontStyle: 'italic' }}>{pregunta}</p>
+
+        <button onClick={nuevaReflexion} style={{ marginBottom: '20px' }}>
           Dame otra 🌟
         </button>
+
+        <textarea
+          placeholder="Escribí tu reflexión aquí..."
+          value={reflexion}
+          onChange={(e) => setReflexion(e.target.value)}
+          style={{
+            width: '100%',
+            height: '80px',
+            padding: '10px',
+            borderRadius: '8px',
+            marginBottom: '10px',
+            fontSize: '1rem',
+            resize: 'none'
+          }}
+        ></textarea>
+
+        <button onClick={guardarReflexion}>
+          Guardar reflexión 📝
+        </button>
+
+        {guardada && (
+          <div style={{ marginTop: '30px', textAlign: 'left' }}>
+            <h4>🧠 Tu última reflexión guardada:</h4>
+            <p style={{ background: '#f0f0f0', padding: '10px', borderRadius: '8px' }}>{guardada}</p>
+          </div>
+        )}
       </header>
     </div>
   );
