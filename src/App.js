@@ -1,3 +1,5 @@
+// App.js completo con traducción corregida en la sección 'en'
+
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { jsPDF } from 'jspdf';
@@ -28,7 +30,7 @@ const textos = {
       "¿Qué elegirías hacer si supieras que vas a tener éxito?"
     ],
     siguiente: "Siguiente ➡️",
-    resultado: "🎯 Resultado de tu brújula personal:",
+    resultado: "🌟 Resultado de tu brújula personal:",
     reiniciar: "Reiniciar test 🔄",
     descargar: "📄 Descargar PDF",
     mensajeFinal: {
@@ -64,7 +66,7 @@ const textos = {
       "What would you choose to do if you knew you'd succeed?"
     ],
     siguiente: "Next ➡️",
-    resultado: "🎯 Your personal compass result:",
+    resultado: "🌟 Your personal compass result:",
     reiniciar: "Restart test 🔄",
     descargar: "📄 Download PDF",
     mensajeFinal: {
@@ -86,6 +88,12 @@ function App() {
   });
   const [finalizado, setFinalizado] = useState(() => {
     return localStorage.getItem('finalizadoBrújula') === 'true';
+  });
+  const [feedback, setFeedback] = useState({
+    experiencia: '',
+    funcionFavorita: '',
+    pagarias: '',
+    comentario: ''
   });
 
   const t = textos[idioma];
@@ -119,103 +127,66 @@ function App() {
 
   const analizarRespuestas = () => {
     const todo = respuestas.join(" ").toLowerCase();
-
     const intereses = {
       creativo: ["diseño", "crear", "arte", "escribir", "dibujar", "música", "create", "design", "art", "write", "draw", "music"],
       social: ["ayudar", "escuchar", "enseñar", "personas", "comunicar", "help", "listen", "teach", "people", "communicate"],
       analitico: ["resolver", "pensar", "problema", "datos", "analizar", "solve", "think", "problem", "data", "analyze"],
       tecnico: ["tecnología", "construir", "programar", "máquinas", "sistemas", "technology", "build", "code", "machines", "systems"]
     };
-
-    let puntuacion = {
-      creativo: 0,
-      social: 0,
-      analitico: 0,
-      tecnico: 0
-    };
-
+    let puntuacion = { creativo: 0, social: 0, analitico: 0, tecnico: 0 };
     for (const categoria in intereses) {
       intereses[categoria].forEach(palabra => {
-        if (todo.includes(palabra)) {
-          puntuacion[categoria]++;
-        }
+        if (todo.includes(palabra)) puntuacion[categoria]++;
       });
     }
-
     const categoriaFinal = Object.entries(puntuacion).sort((a, b) => b[1] - a[1])[0][0];
-
     return t.mensajeFinal[categoriaFinal] || t.mensajeFinal["ninguno"];
+  };
+
+  const handleFeedbackChange = (e) => {
+    const { name, value } = e.target;
+    setFeedback({ ...feedback, [name]: value });
   };
 
   const descargarPDF = () => {
     const doc = new jsPDF();
-  
     const fecha = new Date().toLocaleDateString(idioma === 'es' ? 'es-ES' : 'en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      year: 'numeric', month: 'long', day: 'numeric'
     });
-  
-    // 🧭 PORTADA
     doc.setFontSize(24);
-    doc.text(t.idioma === 'es' ? "Tu Brújula Personal" : "Your Personal Compass", 105, 60, null, null, 'center');
-  
+    doc.text(idioma === 'es' ? "Tu Brújula Personal" : "Your Personal Compass", 105, 60, null, null, 'center');
     doc.setFontSize(14);
     doc.setTextColor(100);
-    doc.text(
-      idioma === 'es'
-        ? "Una guía de autodescubrimiento hecha por vos mismo"
-        : "A self-discovery guide made by you",
-      105,
-      70,
-      null,
-      null,
-      'center'
-    );
-  
+    doc.text(idioma === 'es'
+      ? "Una guía de autodescubrimiento hecha por vos mismo"
+      : "A self-discovery guide made by you", 105, 70, null, null, 'center');
     doc.setFontSize(12);
     doc.setTextColor(150);
     doc.text(`${fecha}`, 105, 80, null, null, 'center');
-  
-    doc.addPage(); // 🆕 Nueva página para el contenido
-  
-    // 🧠 RESULTADO
+    doc.addPage();
     doc.setFontSize(16);
     doc.setTextColor(0);
     doc.text(t.resultado, 10, 20);
-  
     doc.setFontSize(12);
     doc.text(analizarRespuestas(), 10, 30);
-  
-    // 📝 RESPUESTAS
     let y = 45;
     respuestas.forEach((resp, idx) => {
-      const pregunta = `${idx + 1}. ${t.preguntas[idx]}`;
-      const respuesta = `→ ${resp}`;
       doc.setFont('helvetica', 'bold');
-      doc.text(pregunta, 10, y);
+      doc.text(`${idx + 1}. ${t.preguntas[idx]}`, 10, y);
       y += 7;
       doc.setFont('helvetica', 'normal');
-      doc.text(respuesta, 10, y);
+      doc.text(`→ ${resp}`, 10, y);
       y += 10;
-  
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
+      if (y > 270) { doc.addPage(); y = 20; }
     });
-  
     doc.save("brujula_resultado.pdf");
   };
-  
 
   return (
     <div className="App">
       <header className="App-header">
         <div style={{ textAlign: 'right' }}>
-          <button onClick={() => setIdioma(idioma === 'es' ? 'en' : 'es')}>
-            🌐 {idioma === 'es' ? 'EN' : 'ES'}
-          </button>
+          <button onClick={() => setIdioma(idioma === 'es' ? 'en' : 'es')}>🌐 {idioma === 'es' ? 'EN' : 'ES'}</button>
         </div>
         <h1>{t.titulo}</h1>
         {!finalizado ? (
@@ -225,15 +196,7 @@ function App() {
               placeholder="..."
               value={respuestas[paso]}
               onChange={handleRespuesta}
-              style={{
-                width: '100%',
-                height: '80px',
-                padding: '10px',
-                borderRadius: '8px',
-                marginBottom: '10px',
-                fontSize: '1rem',
-                resize: 'none'
-              }}
+              style={{ width: '100%', height: '80px', padding: '10px', borderRadius: '8px', marginBottom: '10px', fontSize: '1rem', resize: 'none' }}
             />
             <button onClick={siguientePaso}>{t.siguiente}</button>
           </>
@@ -243,14 +206,44 @@ function App() {
             <p>{analizarRespuestas()}</p>
             <ul style={{ textAlign: 'left' }}>
               {respuestas.map((resp, idx) => (
-                <li key={idx}>
-                  <strong>{t.preguntas[idx]}</strong><br />
-                  {resp}
-                </li>
+                <li key={idx}><strong>{t.preguntas[idx]}</strong><br />{resp}</li>
               ))}
             </ul>
             <button onClick={descargarPDF}>{t.descargar}</button>
             <button onClick={reiniciar}>{t.reiniciar}</button>
+
+            <hr style={{ margin: '2rem 0', width: '100%' }} />
+            <h3>{idioma === 'es' ? '¿Querés ayudarnos a mejorar Brújula App?' : 'Help us improve Brújula App?'}</h3>
+            <div style={{ textAlign: 'left', maxWidth: '600px' }}>
+              <label>
+                {idioma === 'es' ? '¿Cómo fue tu experiencia?' : 'How was your experience?'}
+                <br />
+                <input type="text" name="experiencia" value={feedback.experiencia} onChange={handleFeedbackChange} style={{ width: '100%', marginBottom: '10px' }} />
+              </label>
+              <label>
+                {idioma === 'es' ? '¿Qué función te gustó más?' : 'What feature did you like the most?'}
+                <br />
+                <input type="text" name="funcionFavorita" value={feedback.funcionFavorita} onChange={handleFeedbackChange} style={{ width: '100%', marginBottom: '10px' }} />
+              </label>
+              <label>
+                {idioma === 'es' ? '¿Pagarías por una versión premium?' : 'Would you pay for a premium version?'}
+                <br />
+                <select name="pagarias" value={feedback.pagarias} onChange={handleFeedbackChange} style={{ width: '100%', marginBottom: '10px' }}>
+                  <option value="">---</option>
+                  <option value="si">{idioma === 'es' ? 'Sí' : 'Yes'}</option>
+                  <option value="tal vez">{idioma === 'es' ? 'Tal vez' : 'Maybe'}</option>
+                  <option value="no">{idioma === 'es' ? 'No' : 'No'}</option>
+                </select>
+              </label>
+              <label>
+                {idioma === 'es' ? '¿Algo que quieras decirnos?' : 'Anything else you’d like to say?'}
+                <br />
+                <textarea name="comentario" value={feedback.comentario} onChange={handleFeedbackChange} rows="3" style={{ width: '100%', marginBottom: '10px' }} />
+              </label>
+              <button onClick={() => console.log('Feedback:', feedback)}>
+                {idioma === 'es' ? 'Enviar feedback 📨' : 'Send feedback 📨'}
+              </button>
+            </div>
           </>
         )}
       </header>
